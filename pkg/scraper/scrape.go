@@ -13,10 +13,10 @@ type Product struct {
 	Price int
 }
 
-func New(name, asinc string, price int) *Product {
+func New(name, asin string, price int) *Product {
 	return &Product{
 		Name:  name,
-		ASIN:  asinc,
+		ASIN:  asin,
 		Price: price,
 	}
 }
