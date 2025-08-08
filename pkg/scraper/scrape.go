@@ -2,7 +2,6 @@ package scraper
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/gocolly/colly"
 )
@@ -24,30 +23,14 @@ func New(name, asin string, price int) *Product {
 func (p *Product) Scrape() error {
 	url := "https://www.amazon.in/dp/" + p.ASIN
 
-	c := colly.NewCollector(
-		colly.AllowedDomains("www.amazon.in", "amazon.in"),
-	)
-
-	c.SetRequestTimeout(30 * time.Second)
-
-	// Amazon blocks requests that do noy have a User-Agent header set.
-	c.OnRequest(func(r *colly.Request) {
-		r.Headers.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36")
-		r.Headers.Set("Accept-Language", "en-US,en;q=0.9")
-
-		fmt.Printf("\n[Visiting]: %s\n\n", r.URL)
-	})
+	c := newAmazonCollector()
 
 	c.OnHTML(".priceToPay .a-price-whole", func(e *colly.HTMLElement) {
-		fmt.Println("✅ Final Product Price:", e.Text)
-	})
-
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Printf("\n[Error] %s: %v\n", r.Request.URL, err)
+		fmt.Println("💰 Price Found:", e.Text)
 	})
 
 	if err := c.Visit(url); err != nil {
-		return fmt.Errorf("failed to visit URL %s: %w", url, err)
+		return fmt.Errorf("failed to visit %s: %w", url, err)
 	}
 
 	return nil
